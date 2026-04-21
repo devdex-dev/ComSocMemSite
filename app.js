@@ -38,40 +38,35 @@ let MEMBERS_DATA = [];
  * Called once on page load.
  */
 async function loadCSV() {
+  // Show a loading indicator while fetching
   resultArea.innerHTML = `<p style="color:var(--muted);font-size:13px;text-align:center;padding:24px 0;">
     Loading member registry…
   </p>`;
 
-  // Derive base URL from the current page so the fetch works whether the site
-  // is at a root domain OR a GitHub Pages subdirectory (e.g. /repo-name/).
-  const base   = window.location.href.replace(/\/[^\/]*$/, '/');
-  const csvUrl = base + 'members.csv';
-
   try {
-    const response = await fetch(csvUrl);
+    const response = await fetch('members.csv');
 
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status} — ${response.statusText} (tried: ${csvUrl})`);
+      throw new Error(`Could not load members.csv (HTTP ${response.status})`);
     }
 
     const text = await response.text();
     MEMBERS_DATA = parseCSV(text);
 
-    if (MEMBERS_DATA.length === 0) {
-      throw new Error('CSV loaded but has no data rows. Check the file format.');
-    }
-
+    // Clear loading message
     resultArea.innerHTML = '';
 
+    // Populate stats strip
     const courses = new Set(MEMBERS_DATA.map(m => m.course.split('—')[0].trim()));
     statTotal.textContent    = MEMBERS_DATA.length;
     statCourses.textContent  = courses.size;
     statYear.textContent     = new Date().getFullYear();
     statsStrip.style.display = 'flex';
 
-    searchInput.disabled    = false;
-    searchBtn.disabled      = false;
-    searchInput.placeholder = 'Enter name or Member ID…';
+    // Enable search controls now that data is ready
+    searchInput.disabled     = false;
+    searchBtn.disabled       = false;
+    searchInput.placeholder  = 'Enter name or Member ID…';
 
   } catch (err) {
     console.error('CSV load error:', err);
@@ -80,14 +75,12 @@ async function loadCSV() {
         <div class="notfound-icon">⚠️</div>
         <div class="notfound-title">Could not load member registry</div>
         <p class="notfound-sub">
-          <strong>Error:</strong> ${escapeHtml(err.message)}<br/><br/>
-          <strong>Checklist:</strong><br/>
-          1. Is <code>members.csv</code> uploaded to your GitHub repo?<br/>
-          2. Is the filename exactly <code>members.csv</code> (all lowercase, no spaces)?<br/>
-          3. Is it in the <strong>same folder</strong> as <code>index.html</code>?<br/>
-          4. Did you <strong>commit and push</strong> it — not just save locally?<br/><br/>
-          After fixing, wait ~1 min for GitHub Pages to rebuild, then hard-refresh
-          (<kbd>Ctrl+Shift+R</kbd> or <kbd>Cmd+Shift+R</kbd>).
+          Make sure <code>members.csv</code> is in the same folder as <code>index.html</code>.<br/><br/>
+          <strong>Note:</strong> If opening the file directly in a browser (<code>file://</code>),
+          use a local server instead:<br/>
+          <code>npx serve .</code> &nbsp;or&nbsp; <code>python -m http.server</code>
+          <br/><br/>
+          On GitHub Pages this works automatically. ✅
         </p>
       </div>`;
   }
