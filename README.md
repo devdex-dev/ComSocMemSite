@@ -1,6 +1,6 @@
 # 🛰️ COMSOC Club — Member Verification System
 
-A clean, static, GitHub Pages-ready membership verification portal for your IEEE COMSOC chapter.
+A clean, static, GitHub Pages-ready membership verification portal for your COMSOC chapter.
 
 ---
 
