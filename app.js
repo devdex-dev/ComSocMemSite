@@ -199,14 +199,48 @@ function levenshtein(a, b) {
 }
 
 /**
- * Find an exact match by Member ID or full name (case-insensitive).
+ * Find a match by:
+ *  1. Exact Member ID  (e.g. "COM-2025-001")
+ *  2. Exact full name  (e.g. "Alexandra Reyes")
+ *  3. Partial name     (e.g. "Alexandra" or "Reyes" — substring match)
+ *
+ * If multiple partial matches exist, returns the first one; the rest
+ * are shown as suggestions via findAllPartial().
+ *
  * @returns {object|null}
  */
 function findExact(query) {
   const q = normalize(query);
-  return MEMBERS_DATA.find(m =>
-    normalize(m.id) === q || normalize(m.name) === q
-  ) || null;
+
+  // 1. Exact ID match
+  const byId = MEMBERS_DATA.find(m => normalize(m.id) === q);
+  if (byId) return byId;
+
+  // 2. Exact full-name match
+  const byName = MEMBERS_DATA.find(m => normalize(m.name) === q);
+  if (byName) return byName;
+
+  // 3. Partial name match (at least 2 chars to avoid noise)
+  if (q.length >= 2) {
+    const partials = MEMBERS_DATA.filter(m => normalize(m.name).includes(q));
+    if (partials.length > 0) return partials[0];
+  }
+
+  return null;
+}
+
+/**
+ * Return ALL members whose name contains the query as a substring.
+ * Used to populate "Other matches" suggestions when multiple records hit.
+ */
+function findAllPartial(query) {
+  const q = normalize(query);
+  if (q.length < 2) return [];
+  return MEMBERS_DATA.filter(m =>
+    normalize(m.id) === q ||
+    normalize(m.name) === q ||
+    normalize(m.name).includes(q)
+  );
 }
 
 /**
@@ -311,7 +345,7 @@ function renderNotFound(query) {
 /**
  * Render fuzzy suggestion items below the search card.
  */
-function renderSuggestions(matches) {
+function renderSuggestions(matches, label = 'Did you mean?') {
   if (matches.length === 0) {
     suggestionsBox.style.display = 'none';
     return;
@@ -319,7 +353,7 @@ function renderSuggestions(matches) {
 
   suggestionsBox.innerHTML = matches.map(m => `
     <div class="suggestion-item" role="option" data-id="${escapeHtml(m.id)}" tabindex="0">
-      <span class="sug-label">Did you mean?</span>
+      <span class="sug-label">${escapeHtml(label)}</span>
       <strong>${escapeHtml(m.name)}</strong>
       <span class="sug-id">${escapeHtml(m.id)}</span>
     </div>`).join('');
@@ -369,13 +403,18 @@ function performSearch() {
     return;
   }
 
-  const exact = findExact(query);
+  const match = findExact(query);
 
-  if (exact) {
-    resultArea.innerHTML = renderMemberCard(exact, code);
+  if (match) {
+    resultArea.innerHTML = renderMemberCard(match, code);
+
+    // If there are more partial matches, show them as "Other matches" suggestions
+    const allPartial = findAllPartial(query).filter(m => m.id !== match.id);
+    renderSuggestions(allPartial, 'Other matches:');
   } else {
     resultArea.innerHTML = renderNotFound(query);
-    renderSuggestions(findFuzzy(query));
+    // Fall back to fuzzy (typo-style) suggestions
+    renderSuggestions(findFuzzy(query), 'Did you mean?');
   }
 }
 
