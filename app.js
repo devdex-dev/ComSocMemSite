@@ -202,55 +202,102 @@ function levenshtein(a, b) {
 }
 
 /**
- * Find a match by:
- *  1. Exact Member ID  (e.g. "COM-2025-001")
- *  2. Exact full name  (e.g. "Alexandra Reyes")
- *  3. Partial name — left-to-right: query must match the start of the full
- *     name OR the start of any individual word in the name.
- *     e.g. "ale" matches "Alexandra Reyes" (starts with "ale")
- *          "rey" matches "Alexandra Reyes" (word "reyes" starts with "rey")
- *          "ndra" does NOT match (mid-word, not from the left)
+ * CSV name format: "Last, First"  (e.g. "De Asis, Marie")
  *
- * @returns {object|null}
+ * extractLastName — returns everything before the comma (the last name).
+ *   "De Asis, Marie"  → "de asis"
+ *   "Santos, Juan"    → "santos"
+ *   "Cruz"            → "cruz"   (no comma — treat whole string as last name)
+ *
+ * extractFirstName — returns everything after the comma (the first name).
+ *   "De Asis, Marie"  → "marie"
  */
-function nameStartsWith(name, q) {
-  if (name.startsWith(q)) return true;
-  return name.split(' ').some(word => word.startsWith(q));
+function extractLastName(normalizedName) {
+  const commaIdx = normalizedName.indexOf(',');
+  if (commaIdx === -1) return normalizedName.trim();
+  return normalizedName.slice(0, commaIdx).trim();
 }
 
-function findExact(query) {
-  const q = normalize(query);
+function extractFirstName(normalizedName) {
+  const commaIdx = normalizedName.indexOf(',');
+  if (commaIdx === -1) return '';
+  return normalizedName.slice(commaIdx + 1).trim();
+}
 
-  const byId = MEMBERS_DATA.find(m => normalize(m.id) === q);
-  if (byId) return byId;
+/**
+ * True if the last name (before the comma) starts with q.
+ * Also handles compound last names like "De Asis", "De Los Santos":
+ * checks both the full last-name string and each word within it.
+ *
+ * Examples (name = "de asis, marie"):
+ *   lastNameStartsWith("de asis, marie", "de")       → true
+ *   lastNameStartsWith("de asis, marie", "de asis")  → true
+ *   lastNameStartsWith("de asis, marie", "asis")     → true  (word match)
+ *   lastNameStartsWith("de asis, marie", "mar")      → false (first name)
+ *   lastNameStartsWith("de asis, marie", "sis")      → false (mid-word)
+ */
+function lastNameStartsWith(normalizedName, q) {
+  const lastName = extractLastName(normalizedName);
+  if (lastName.startsWith(q)) return true;
 
-  const byName = MEMBERS_DATA.find(m => normalize(m.name) === q);
-  if (byName) return byName;
+  const qWords = q.split(' ');
+  const lWords = lastName.split(' ');
 
-  if (q.length >= 2) {
-    const partials = MEMBERS_DATA.filter(m => nameStartsWith(normalize(m.name), q));
-    if (partials.length > 0) return partials[0];
+  if (qWords.length === 1) {
+    return lWords.some(w => w.startsWith(q));
   }
 
-  return null;
+  // Multi-word query: check every consecutive window inside the last name
+  for (let i = 0; i <= lWords.length - qWords.length; i++) {
+    const run = lWords.slice(i, i + qWords.length).join(' ');
+    if (run.startsWith(q)) return true;
+  }
+  return false;
 }
 
 /**
- * Return ALL members whose name starts with the query (full name or any word).
- * Used to populate "Other matches" suggestions when multiple records hit.
+ * Master search — returns { exact, multiple }
+ *
+ *   exact    {object|null}  single definitive hit  → show member card
+ *   multiple {object[]}     2+ hits                → show all as suggestions
+ *
+ * Priority (tuned for "Last, First" CSV format where users type last names):
+ *  1. Exact Member ID             ("COM-2025-001")
+ *  2. Exact full stored name      ("De Asis, Marie")
+ *  3. Exact last-name match       ("De Asis"  → all members with that last name)
+ *  4. Last-name starts-with       ("De A"     → last names starting with "de a")
+ *  5. Last-name word starts-with  ("Asis"     → last names containing word "asis")
  */
-function findAllPartial(query) {
+function findMatches(query) {
   const q = normalize(query);
-  if (q.length < 2) return [];
-  return MEMBERS_DATA.filter(m =>
-    normalize(m.id) === q ||
-    normalize(m.name) === q ||
-    nameStartsWith(normalize(m.name), q)
-  );
+
+  // 1. Exact Member ID
+  const byId = MEMBERS_DATA.find(m => normalize(m.id) === q);
+  if (byId) return { exact: byId, multiple: [] };
+
+  // 2. Exact full stored name (e.g. user typed "De Asis, Marie" exactly)
+  const byFullName = MEMBERS_DATA.filter(m => normalize(m.name) === q);
+  if (byFullName.length === 1) return { exact: byFullName[0], multiple: [] };
+  if (byFullName.length  >  1) return { exact: null, multiple: byFullName };
+
+  if (q.length < 2) return { exact: null, multiple: [] };
+
+  // 3. Exact last-name match (most common: user types "De Asis")
+  const byLastExact = MEMBERS_DATA.filter(m => extractLastName(normalize(m.name)) === q);
+  if (byLastExact.length === 1) return { exact: byLastExact[0], multiple: [] };
+  if (byLastExact.length  >  1) return { exact: null, multiple: byLastExact };
+
+  // 4. Last-name starts-with (user types partial last name "De A")
+  const byLastPartial = MEMBERS_DATA.filter(m => lastNameStartsWith(normalize(m.name), q));
+  if (byLastPartial.length === 1) return { exact: byLastPartial[0], multiple: [] };
+  if (byLastPartial.length  >  1) return { exact: null, multiple: byLastPartial };
+
+  return { exact: null, multiple: [] };
 }
 
 /**
- * Find fuzzy / partial matches for suggestions.
+ * Fuzzy / typo-tolerant fallback — only called when findMatches() finds nothing.
+ * Checks full name, last name, and each word in the last name via Levenshtein.
  * Returns up to 5 closest members sorted by edit distance.
  */
 function findFuzzy(query) {
@@ -259,18 +306,21 @@ function findFuzzy(query) {
 
   return MEMBERS_DATA
     .map(m => {
-      const nName = normalize(m.name);
-      const nId   = normalize(m.id);
+      const nName    = normalize(m.name);
+      const nId      = normalize(m.id);
+      const lastName = extractLastName(nName);
 
-      // Left-to-right match wins immediately (score 0)
-      if (nameStartsWith(nName, q) || nId.startsWith(q)) {
+      // Left-to-right last-name match → score 0
+      if (lastNameStartsWith(nName, q) || nId.startsWith(q)) {
         return { member: m, score: 0 };
       }
 
-      const words   = nName.split(' ');
+      // Levenshtein against full name, last name, and each word in last name
+      const lWords  = lastName.split(' ');
       const minDist = Math.min(
         levenshtein(nName, q),
-        ...words.map(w => levenshtein(w, q))
+        levenshtein(lastName, q),
+        ...lWords.map(w => levenshtein(w, q))
       );
 
       if (minDist <= Math.max(2, Math.floor(q.length / 3))) {
@@ -411,14 +461,18 @@ function performSearch() {
     return;
   }
 
-  const match = findExact(query);
+  const { exact, multiple } = findMatches(query);
 
-  if (match) {
-    resultArea.innerHTML = renderMemberCard(match, code);
-    const allPartial = findAllPartial(query).filter(m => m.id !== match.id);
-    renderSuggestions(allPartial, 'Other matches:');
+  if (exact) {
+    // Single definitive match — show the member card
+    resultArea.innerHTML = renderMemberCard(exact, code);
+    hideSuggestions();
+  } else if (multiple.length > 0) {
+    // Multiple matches — show all as suggestions so user picks the right person
+    resultArea.innerHTML = '';
+    renderSuggestions(multiple, 'Multiple members found — select one:');
   } else {
-    // Show Not Found card AND fuzzy suggestions together
+    // No match at all — show Not Found card AND fuzzy "Did you mean?" together
     resultArea.innerHTML = renderNotFound(query);
     renderSuggestions(findFuzzy(query), 'Did you mean?');
   }
