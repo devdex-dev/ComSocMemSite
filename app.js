@@ -70,7 +70,7 @@ async function loadCSV() {
 );
     statTotal.textContent    = MEMBERS_DATA.length;
     statCourses.textContent  = courses.size;
-    statYear.textContent     = new Date().getFullYear();
+    statYear.textContent     = await loadAcademicYear();
     statsStrip.style.display = 'flex';
 
     searchInput.disabled    = false;
@@ -474,12 +474,36 @@ searchInput.disabled    = true;
 searchBtn.disabled      = true;
 searchInput.placeholder = 'Loading registry…';
 
-
-
-
-
-
-
 // Kick off CSV fetch
 loadCSV();
 
+
+/**
+ * Fetch and parse academic_year.csv to get the current academic year.
+ * Returns the academic year string (e.g., "2025-2026").
+ * Falls back to current year if the file cannot be loaded.
+ */
+async function loadAcademicYear() {
+  try {
+    const base = window.location.href.replace(/\/[^\/]*$/, '/');
+    const yearUrl = base + 'academic_year.csv';
+    const response = await fetch(yearUrl);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+    
+    const text = await response.text();
+    const lines = text.trim().split('\n');
+    
+    // Second line (index 1) contains the academic year
+    if (lines.length > 1) {
+      return lines[1].trim();
+    }
+    
+    return new Date().getFullYear();
+  } catch (err) {
+    console.warn('Could not load academic year, falling back to current year:', err);
+    return new Date().getFullYear();
+  }
+}
