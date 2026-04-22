@@ -2,7 +2,7 @@
 
 A clean, static, GitHub Pages-ready membership verification portal for your COMSOC chapter. Pure vanilla JavaScript with no dependencies.
 
-**Status:** ✅ Production Ready | **Language:** Vanilla JavaScript | **Hosting:** GitHub Pages | **Version:** v1.1
+**Status:** ✅ Production Ready | **Version:** v1.1
 
 ---
 
