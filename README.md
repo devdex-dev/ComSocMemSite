@@ -1,60 +1,34 @@
-# 🛰️ COMSOC Club — Member Verification System
+# ComSocMemSite Documentation
 
-A clean, static, GitHub Pages-ready membership verification portal for your COMSOC chapter.
+## Overview
+ComSocMemSite is a platform designed for managing societal communication and membership activities. The application provides tools for users to engage with their society, including posting updates, participating in discussions, and managing members.
 
----
+## Features
+- **User Management**: Register and manage user roles within the society.
+- **Post Updates**: Easy posting of updates to keep members informed.
+- **Discussion Forums**: Engage in discussions with other members.
+- **Event Management**: Schedule and manage events effectively.
 
-## 📁 Folder Structure
+## Getting Started
+1. **Clone the Repository**: Use the following command to clone the repository:
+   ```bash
+   git clone https://github.com/devdex-dev/ComSocMemSite.git
+   ```
+2. **Install Dependencies**: Navigate to the project directory and install dependencies:
+   ```bash
+   cd ComSocMemSite
+   npm install
+   ```
+3. **Run the Application**: Start the server:
+   ```bash
+   npm start
+   ```
 
-```
-comsoc-verify/
-├── index.html          ← Main page (single HTML file)
-├── style.css           ← All styling (dark-tech aesthetic)
-├── app.js              ← Search logic, fuzzy matching, UI rendering
-├── members.js          ← Member data
-└── README.md           ← This file
-```
+## Contributing
+We welcome contributions! Please read our contributing guidelines before submitting a pull request.
 
+## License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🔍 How Search Works
-
-| Feature | Behavior |
-|---|---|
-| **Name search** | Full name[lastname, firstname, case-insensitive, trimmed |
-| **ID search** | Exact Member ID match (e.g. `COM-2025-001`) |
-| **Verification code[not intrated yet]** | Optional — enter to validate against record |
-| **Not found** | Shows clear error card with instructions |
-
-### Accurate Matching Rules:
-- Search must match the **full name** exactly (no partial name → result).
-- OR must match the **exact Member ID**.
-- The fuzzy suggestions panel shows partial/close matches to help the user correct their query — but does not count as a successful verification.
-
----
-
-## 🔒 Security Notes
-
-- This is a **client-side static system** — all data is in `members.js`.
-- Anyone who views source can see member data. This is intentional for a public directory.
-
----
-
-## 🛠️ Customization Tips
-
-| What to change | Where |
-|---|---|
-| Club name / logo | `index.html` — `.logo-title`, `.logo-sub` |
-| Colors & fonts | `style.css` — `:root` CSS variables |
-| Accent color | `--accent` in `style.css` |
-| Academic year | Auto-detected from system clock in `app.js` |
-| Footer text | `index.html` — `<footer>` |
-
----
-
-## 📬 Support
-
-For questions, contact your COMSOC chapter officers or open an issue in the repository.
-
----
-
-* Computer Society (COMSOC) — Member Verification System v1.0*
+## Contact
+For inquiries, please reach out to [contact@comsocmemsite.org](mailto:contact@comsocmemsite.org).
