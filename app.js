@@ -403,7 +403,6 @@ function renderNoExactMatch(query) {
       <div class="notfound-title" style="color:var(--warning-dark,#b45309);">No exact match found</div>
       <p class="notfound-sub">
         No record exactly matches <strong>"${escapeHtml(query)}"</strong>.
-        Did you mean one of the members below?
       </p>
     </div>`;
 }
