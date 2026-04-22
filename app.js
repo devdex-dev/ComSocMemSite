@@ -63,7 +63,7 @@ async function loadCSV() {
 
     resultArea.innerHTML = '';
 
-    const courses = new Set(MEMBERS_DATA.map(m => m.course.split('—')[0].trim()));
+    const courses = new Set(MEMBERS_DATA.map(m => m.course.split('-')[0].trim()));
     statTotal.textContent    = MEMBERS_DATA.length;
     statCourses.textContent  = courses.size;
     statYear.textContent     = new Date().getFullYear();
