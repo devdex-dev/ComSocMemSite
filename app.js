@@ -42,8 +42,6 @@ async function loadCSV() {
     Loading member registry…
   </p>`;
 
-  // Derive base URL from the current page so the fetch works whether the site
-  // is at a root domain OR a GitHub Pages subdirectory (e.g. /repo-name/).
   const base   = window.location.href.replace(/\/[^\/]*$/, '/');
   const csvUrl = base + 'members.csv';
 
@@ -64,10 +62,11 @@ async function loadCSV() {
     resultArea.innerHTML = '';
 
     const courses = new Set(
-  MEMBERS_DATA
-    .map(m => m.course.split('-')[0].trim())
-    .filter(course => course && course !== 'undefined')
-);
+      MEMBERS_DATA
+        .map(m => m.course.split('-')[0].trim())
+        .filter(course => course && course !== 'undefined')
+    );
+
     statTotal.textContent    = MEMBERS_DATA.length;
     statCourses.textContent  = courses.size;
     statYear.textContent     = await loadAcademicYear();
@@ -118,19 +117,14 @@ async function loadCSV() {
  * @returns {Array<{id, name, course, verificationCode}>}
  */
 function parseCSV(csvText) {
-  // Normalize line endings to \n
   const lines = csvText.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
-
   const members = [];
 
-  // Row 0 is the header — start from row 1
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i].trim();
-    if (!line) continue; // skip blank lines
+    if (!line) continue;
 
     const cols = splitCSVLine(line);
-
-    // Need at least 4 columns to be a valid record
     if (cols.length < 4) continue;
 
     members.push({
@@ -162,14 +156,12 @@ function splitCSVLine(line) {
 
     if (ch === '"') {
       if (inQuotes && next === '"') {
-        // Escaped quote inside quoted field: "" → "
         current += '"';
-        i++; // skip the second quote
+        i++;
       } else {
-        inQuotes = !inQuotes; // toggle quoted mode
+        inQuotes = !inQuotes;
       }
     } else if (ch === ',' && !inQuotes) {
-      // Field separator (only outside quotes)
       fields.push(current);
       current = '';
     } else {
@@ -177,7 +169,7 @@ function splitCSVLine(line) {
     }
   }
 
-  fields.push(current); // push last field
+  fields.push(current);
   return fields;
 }
 
@@ -215,23 +207,17 @@ function levenshtein(a, b) {
  *  2. Exact full name  (e.g. "Alexandra Reyes")
  *  3. Partial name     (e.g. "Alexandra" or "Reyes" — substring match)
  *
- * If multiple partial matches exist, returns the first one; the rest
- * are shown as suggestions via findAllPartial().
- *
  * @returns {object|null}
  */
 function findExact(query) {
   const q = normalize(query);
 
-  // 1. Exact ID match
   const byId = MEMBERS_DATA.find(m => normalize(m.id) === q);
   if (byId) return byId;
 
-  // 2. Exact full-name match
   const byName = MEMBERS_DATA.find(m => normalize(m.name) === q);
   if (byName) return byName;
 
-  // 3. Partial name match (at least 2 chars to avoid noise)
   if (q.length >= 2) {
     const partials = MEMBERS_DATA.filter(m => normalize(m.name).includes(q));
     if (partials.length > 0) return partials[0];
@@ -267,19 +253,16 @@ function findFuzzy(query) {
       const nName = normalize(m.name);
       const nId   = normalize(m.id);
 
-      // Substring match wins immediately (score 0)
       if (nName.includes(q) || nId.includes(q)) {
         return { member: m, score: 0 };
       }
 
-      // Levenshtein against full name and each individual word
       const words   = nName.split(' ');
       const minDist = Math.min(
         levenshtein(nName, q),
         ...words.map(w => levenshtein(w, q))
       );
 
-      // Accept if distance is within a reasonable threshold
       if (minDist <= Math.max(2, Math.floor(q.length / 3))) {
         return { member: m, score: minDist };
       }
@@ -371,7 +354,6 @@ function renderSuggestions(matches, label = 'Did you mean?') {
 
   suggestionsBox.style.display = 'block';
 
-  // Click a suggestion → fill input and search immediately
   suggestionsBox.querySelectorAll('.suggestion-item').forEach(item => {
     const handler = () => {
       const member = MEMBERS_DATA.find(m => m.id === item.dataset.id);
@@ -396,6 +378,11 @@ function hideSuggestions() {
 
 // ─── MAIN SEARCH HANDLER ───────────────────────────────────────
 
+/**
+ * Runs only when the Verify button is clicked or Enter is pressed.
+ * - Exact/partial match  → show member card + "Other matches" suggestions
+ * - No match             → show Not Found card + fuzzy "Did you mean?" suggestions
+ */
 function performSearch() {
   const query = searchInput.value.trim();
   const code  = codeInput ? codeInput.value.trim() : '';
@@ -418,13 +405,11 @@ function performSearch() {
 
   if (match) {
     resultArea.innerHTML = renderMemberCard(match, code);
-
-    // If there are more partial matches, show them as "Other matches" suggestions
     const allPartial = findAllPartial(query).filter(m => m.id !== match.id);
     renderSuggestions(allPartial, 'Other matches:');
   } else {
+    // Show Not Found card AND fuzzy suggestions together
     resultArea.innerHTML = renderNotFound(query);
-    // Fall back to fuzzy (typo-style) suggestions
     renderSuggestions(findFuzzy(query), 'Did you mean?');
   }
 }
@@ -438,56 +423,20 @@ searchInput.addEventListener('keydown', e => {
   if (e.key === 'Escape') hideSuggestions();
 });
 
+// Real-time input: only manages the clear button and resets stale results.
+// No search logic runs here — everything is deferred to performSearch().
+searchInput.addEventListener('input', () => {
+  updateClearBtn();
 
-// NEW ADDD
-
-// ADD THIS NEW EVENT LISTENER FOR REAL-TIME SUGGESTIONS:
-searchInput.addEventListener('input', e => {
-  const query = searchInput.value.trim();
-  
-  if (query.length === 0) {
-    hideSuggestions();
-    resultArea.innerHTML = '';
-    return;
-  }
-  
-  if (MEMBERS_DATA.length === 0) return;
-  
-  // Try exact match first
-  const match = findExact(query);
-  
-  if (match) {
-    // Show the matched member card in real-time
-    resultArea.innerHTML = renderMemberCard(match, '');
-    
-    // Show other partial matches as suggestions
-    const allPartial = findAllPartial(query).filter(m => m.id !== match.id);
-    renderSuggestions(allPartial, 'Other matches:');
-  } else {
-    // No exact match — show fuzzy suggestions in real-time
-    const fuzzyMatches = findFuzzy(query);
-    
-    if (fuzzyMatches.length > 0) {
-      resultArea.innerHTML = '';
-      renderSuggestions(fuzzyMatches, 'Did you mean?');
-    } else {
-      resultArea.innerHTML = renderNotFound(query);
-      hideSuggestions();
-    }
-  }
+  // Clear any previous results so stale cards don't linger while the user
+  // is still typing.
+  resultArea.innerHTML = '';
+  hideSuggestions();
 });
-
-// 
-
-
-
-
 
 function updateClearBtn() {
   clearBtn.style.display = searchInput.value.length > 0 ? 'block' : 'none';
 }
-
-searchInput.addEventListener('input', updateClearBtn);
 
 clearBtn.addEventListener('click', () => {
   searchInput.value = '';
@@ -522,7 +471,6 @@ searchInput.placeholder = 'Loading registry…';
 // Kick off CSV fetch
 loadCSV();
 
-
 /**
  * Fetch and parse academic_year.csv to get the current academic year.
  * Returns the academic year string (e.g., "2025-2026").
@@ -533,19 +481,18 @@ async function loadAcademicYear() {
     const base = window.location.href.replace(/\/[^\/]*$/, '/');
     const yearUrl = base + 'academic_year.csv';
     const response = await fetch(yearUrl);
-    
+
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
     }
-    
+
     const text = await response.text();
     const lines = text.trim().split('\n');
-    
-    // Second line (index 1) contains the academic year
+
     if (lines.length > 1) {
       return lines[1].trim();
     }
-    
+
     return new Date().getFullYear();
   } catch (err) {
     console.warn('Could not load academic year, falling back to current year:', err);
