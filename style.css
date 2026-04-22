@@ -178,6 +178,7 @@ body {
   max-width: 720px;
   margin: 0 auto;
   padding: 0 24px 80px;
+  overflow: visible; /* never clip suggestions dropdown */
 }
 
 /* ─── SEARCH CARD ─── */
@@ -318,6 +319,8 @@ body {
 
 /* ─── SUGGESTIONS ─── */
 .suggestions-box {
+  position: relative;
+  z-index: 50;
   background: var(--card-bg);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
@@ -327,21 +330,42 @@ body {
 }
 
 .suggestion-item {
-  padding: 10px 16px;
+  padding: 12px 16px;
   cursor: pointer;
   font-size: 13px;
   color: var(--muted);
   transition: background var(--trans), color var(--trans);
   display: flex;
-  align-items: center;
-  gap: 8px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 4px 8px;
   border-bottom: 1px solid var(--border);
+  min-height: 48px; /* comfortable tap target on mobile */
 }
 
 .suggestion-item:last-child { border-bottom: none; }
-.suggestion-item:hover { background: rgba(0,229,255,.07); color: var(--text); }
-.suggestion-item .sug-id { color: var(--accent); font-size: 11px; }
-.suggestion-item .sug-label { font-size: 10px; color: var(--accent); letter-spacing: .1em; text-transform: uppercase; }
+.suggestion-item:hover,
+.suggestion-item:active { background: rgba(0,229,255,.07); color: var(--text); }
+
+.suggestion-item .sug-id {
+  color: var(--accent);
+  font-size: 11px;
+  flex-basis: 100%; /* push ID to its own line */
+}
+
+.suggestion-item .sug-label {
+  font-size: 10px;
+  color: var(--accent);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.suggestion-item strong {
+  color: var(--text);
+  font-weight: 600;
+  word-break: break-word;
+}
 
 /* ─── RESULT AREA ─── */
 .result-area { margin-bottom: 28px; }
@@ -543,4 +567,27 @@ body {
   .info-cell:nth-child(2n) { border-right: none; }
   .stats-strip { flex-direction: column; gap: 16px; }
   .stat-div { width: 40px; height: 1px; }
+
+  /* ── Suggestions on mobile ── */
+  .suggestions-box {
+    /* make sure it's never clipped by parent overflow */
+    position: relative;
+    z-index: 50;
+    margin-top: 8px;
+    border-radius: var(--radius);
+  }
+
+  .suggestion-item {
+    padding: 14px 16px; /* bigger tap target */
+    font-size: 14px;
+    gap: 4px 6px;
+  }
+
+  .suggestion-item .sug-label {
+    font-size: 9px;
+  }
+
+  .suggestion-item .sug-id {
+    font-size: 12px;
+  }
 }
