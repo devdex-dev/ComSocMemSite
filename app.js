@@ -438,6 +438,51 @@ searchInput.addEventListener('keydown', e => {
   if (e.key === 'Escape') hideSuggestions();
 });
 
+
+// NEW ADDD
+
+// ADD THIS NEW EVENT LISTENER FOR REAL-TIME SUGGESTIONS:
+searchInput.addEventListener('input', e => {
+  const query = searchInput.value.trim();
+  
+  if (query.length === 0) {
+    hideSuggestions();
+    resultArea.innerHTML = '';
+    return;
+  }
+  
+  if (MEMBERS_DATA.length === 0) return;
+  
+  // Try exact match first
+  const match = findExact(query);
+  
+  if (match) {
+    // Show the matched member card in real-time
+    resultArea.innerHTML = renderMemberCard(match, '');
+    
+    // Show other partial matches as suggestions
+    const allPartial = findAllPartial(query).filter(m => m.id !== match.id);
+    renderSuggestions(allPartial, 'Other matches:');
+  } else {
+    // No exact match — show fuzzy suggestions in real-time
+    const fuzzyMatches = findFuzzy(query);
+    
+    if (fuzzyMatches.length > 0) {
+      resultArea.innerHTML = '';
+      renderSuggestions(fuzzyMatches, 'Did you mean?');
+    } else {
+      resultArea.innerHTML = renderNotFound(query);
+      hideSuggestions();
+    }
+  }
+});
+
+// 
+
+
+
+
+
 function updateClearBtn() {
   clearBtn.style.display = searchInput.value.length > 0 ? 'block' : 'none';
 }
