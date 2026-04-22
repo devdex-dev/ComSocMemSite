@@ -398,11 +398,13 @@ function renderMemberCard(member, codeEntered) {
  */
 function renderNoExactMatch(query) {
   return `
-    <div class="notfound-card" style="border-color:var(--warning,#f59e0b);background:var(--warning-bg,#fffbeb);">
-      <div class="notfound-icon">🔍</div>
-      <div class="notfound-title" style="color:var(--warning-dark,#b45309);">No exact match found</div>
+    <div class="notfound-card">
+      <div class="notfound-icon">🚫</div>
+      <div class="notfound-title">Not an Official Member</div>
       <p class="notfound-sub">
-        No record exactly matches <strong>"${escapeHtml(query)}"</strong>.
+        No record found for <strong>"${escapeHtml(query)}"</strong> in the official COMSOC member registry.
+        <br/><br/>
+        If you believe this is an error, please contact your chapter officers or check if your name/ID is spelled correctly.
       </p>
     </div>`;
 }
