@@ -1,34 +1,31 @@
-# ComSocMemSite Documentation
+# Project Documentation
 
-## Overview
-ComSocMemSite is a platform designed for managing societal communication and membership activities. The application provides tools for users to engage with their society, including posting updates, participating in discussions, and managing members.
+## Folder Structure
 
-## Features
-- **User Management**: Register and manage user roles within the society.
-- **Post Updates**: Easy posting of updates to keep members informed.
-- **Discussion Forums**: Engage in discussions with other members.
-- **Event Management**: Schedule and manage events effectively.
+- `src/`
+  - Contains the main source code files for the project.
+  - **File Descriptions:**
+    - `app.py`: Main application file.
+    - `config.py`: Configuration settings for the application.
+
+- `tests/`
+  - Contains test files for the project.
+  - **File Descriptions:**
+    - `test_app.py`: Unit tests for the main application.
+
+- `docs/`
+  - Documentation files for the project.
+  - **File Descriptions:**
+    - `setup.md`: Instructions on how to set up the project.
 
 ## Getting Started
-1. **Clone the Repository**: Use the following command to clone the repository:
-   ```bash
-   git clone https://github.com/devdex-dev/ComSocMemSite.git
-   ```
-2. **Install Dependencies**: Navigate to the project directory and install dependencies:
-   ```bash
-   cd ComSocMemSite
-   npm install
-   ```
-3. **Run the Application**: Start the server:
-   ```bash
-   npm start
-   ```
+- Instructions on dependencies and initial setup for new developers to easily get started.
 
 ## Contributing
-We welcome contributions! Please read our contributing guidelines before submitting a pull request.
+- Guidelines for contributing to the project.
 
 ## License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+- Information on the licensing of the project.
 
-## Contact
-For inquiries, please reach out to [contact@comsocmemsite.org](mailto:contact@comsocmemsite.org).
+## Author
+- Name and contact information of the primary author.
