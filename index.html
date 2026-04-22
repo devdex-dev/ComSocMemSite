@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>COMSOC — Computer Society</title>
+  <link rel="stylesheet" href="style.css" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&display=swap"
+    rel="stylesheet" />
+</head>
+
+<body>
+
+  <!-- ─── BACKGROUND ─── -->
+  <div class="bg-glow" aria-hidden="true">
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+    <div class="glow-orb orb-3"></div>
+  </div>
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-noise" aria-hidden="true"></div>
+
+  <!-- ─── NAV ─── -->
+  <nav class="site-nav" role="navigation">
+    <div class="nav-inner">
+      <a class="nav-logo" data-route="home" role="link" aria-label="COMSOC Home">
+        <div class="nav-logo-mark">CS</div>
+        <div>
+          <span class="nav-logo-text">COMSOC</span>
+          <span class="nav-logo-sub">Computer Society</span>
+        </div>
+      </a>
+      <ul class="nav-links" role="menubar">
+        <li role="none"><a data-route="home" role="menuitem">Home</a></li>
+        <li role="none"><a data-route="verify" role="menuitem">Verify</a></li>
+        <!-- <li role="none"><a data-route="members" role="menuitem">Members</a></li> -->
+        <li role="none"><a data-route="events" role="menuitem">Events</a></li>
+        <li role="none"><a data-route="about" role="menuitem">About</a></li>
+        <li role="none" class="nav-admin-link"><a data-route="admin" role="menuitem">Admin</a></li>
+      </ul>
+      <button class="nav-hamburger" id="navHamburger" aria-label="Toggle menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ─── MOBILE DRAWER ─── -->
+  <div class="nav-drawer" id="navDrawer" aria-hidden="true">
+    <ul>
+      <li><a data-route="home">Home</a></li>
+      <li><a data-route="verify">Verify</a></li>
+      <li><a data-route="members">Members</a></li>
+      <li><a data-route="events">Events</a></li>
+      <li><a data-route="about">About</a></li>
+      <li><a data-route="admin">Admin</a></li>
+    </ul>
+  </div>
+
+  <!-- ─── PAGE WRAPPER ─── -->
+  <div class="page-wrapper">
+
+    <!-- ══ HOME ══ -->
+    <div id="view-home" class="page-view">
+      <section class="home-hero">
+        <p class="hero-eyebrow">COMSOC Club</p>
+        <h1 class="hero-headline">
+          Your Community<br />of <span class="accent-grad">Tech Innovators</span>
+        </h1>
+        <p class="hero-sub">
+          The official portal of the Computer Society — <strong>verify membership</strong>,
+          browse the registry, check upcoming events, and connect with your fellow COMSOC members.
+        </p>
+        <div class="hero-cta-row">
+          <button class="btn-primary" data-route="verify">Verify Membership</button>
+          <!-- <button class="btn-ghost"   data-route="members">Browse Members</button> -->
+        </div>
+      </section>
+
+      <!-- stats -->
+      <div class="home-stats glass-panel" id="homeStats"
+        style="margin: 0 28px 52px; max-width: 640px; margin-left: auto; margin-right: auto;">
+        <div class="home-stat">
+          <span class="home-stat-val" id="homeTotalMembers">—</span>
+          <span class="home-stat-label">Total Members</span>
+        </div>
+        <div class="home-stat">
+          <span class="home-stat-val" id="homePrograms">—</span>
+          <span class="home-stat-label">Programs</span>
+        </div>
+        <div class="home-stat">
+          <span class="home-stat-val" id="homeAcadYear">—</span>
+          <span class="home-stat-label">Academic Year</span>
+        </div>
+      </div>
+
+      <!-- feature cards -->
+      <div class="home-features">
+        <div class="feature-card glass-panel" data-route="verify">
+          <div class="feature-icon">🔍</div>
+          <div class="feature-title">Member Verify</div>
+          <div class="feature-desc">Search by name or Member ID to instantly confirm your official COMSOC membership
+            status.</div>
+        </div>
+        <div class="feature-card glass-panel" data-route="members">
+          <div class="feature-icon">📋</div>
+          <div class="feature-title">Member Directory</div>
+          <div class="feature-desc">Browse the full roster of registered members, filterable by program and year level.
+          </div>
+        </div>
+        <div class="feature-card glass-panel" data-route="events">
+          <div class="feature-icon">📅</div>
+          <div class="feature-title">Events</div>
+          <div class="feature-desc">Stay up-to-date with all upcoming workshops, seminars, competitions, and social
+            events.</div>
+        </div>
+        <div class="feature-card glass-panel" data-route="about">
+          <div class="feature-icon">👥</div>
+          <div class="feature-title">About & Officers</div>
+          <div class="feature-desc">Meet the COMSOC officer team and learn how to reach out for inquiries and
+            membership.</div>
+        </div>
+      </div>
+    </div><!-- /home -->
+
+    <!-- ══ VERIFY ══ -->
+    <div id="view-verify" class="page-view">
+      <div class="verify-layout">
+        <div class="section-header">
+          <span class="section-eyebrow">Member Verification Portal</span>
+          <h2 class="section-title">Are you an<br /><span class="accent-grad">official member?</span></h2>
+          <p class="section-sub">Search by <strong>last name, first name</strong> or Member ID to verify your membership
+            in the official COMSOC registry.</p>
+        </div>
+
+        <div class="search-card glass-panel">
+          <div class="search-row">
+            <div class="search-input-wrap">
+              <span class="search-icon" aria-hidden="true">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+              </span>
+              <input type="text" id="searchInput" class="search-input" placeholder="Loading registry…"
+                autocomplete="off" aria-label="Search by name" disabled />
+              <button class="clear-btn" id="clearBtn" aria-label="Clear" style="display:none">✕</button>
+            </div>
+            <button class="search-btn" id="searchBtn" disabled>Verify</button>
+          </div>
+          <details class="code-toggle">
+            <summary><span class="toggle-icon">+</span> Enter Verification Code (optional)</summary>
+            <div class="code-row">
+              <input type="text" id="codeInput" class="code-input" placeholder="e.g. COM-VRF-A001" autocomplete="off"
+                aria-label="Verification code" />
+              <span class="code-hint">Leave blank to skip</span>
+            </div>
+          </details>
+        </div>
+
+        <div id="suggestionsBox" class="suggestions-box" role="listbox" style="display:none"></div>
+        <div id="resultArea" class="result-area" role="region" aria-live="polite"></div>
+
+        <div class="stats-strip glass-panel" id="statsStrip" style="display:none">
+          <div class="stat"><span id="statTotal">0</span><small>Total Members</small></div>
+          <div class="stat-div"></div>
+          <div class="stat"><span id="statCourses">0</span><small>Programs</small></div>
+          <div class="stat-div"></div>
+          <div class="stat"><span id="statYear">—</span><small>Academic Year</small></div>
+        </div>
+      </div>
+    </div><!-- /verify -->
+
+    <!-- ══ MEMBERS DIRECTORY ══ -->
+    <!-- <div id="view-members" class="page-view">
+    <div class="section-shell">
+      <div class="section-header">
+        <span class="section-eyebrow">Official Registry</span>
+        <h2 class="section-title">Member Directory</h2>
+        <p class="section-sub">Full roster of all registered COMSOC members. Filter by program or search by name.</p>
+      </div>
+
+      <div class="dir-controls">
+        <div class="dir-search-wrap">
+          <span class="dir-search-icon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </span>
+          <input type="text" id="dirSearch" class="dir-search" placeholder="Search name or ID…" autocomplete="off"/>
+        </div>
+        <select id="dirFilter" class="dir-filter-select">
+          <option value="">All Programs</option>
+        </select>
+        <span class="dir-count" id="dirCount"></span>
+      </div>
+
+      <div class="dir-table-wrap glass-panel">
+        <table class="dir-table" id="dirTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Member ID</th>
+              <th>Full Name</th>
+              <th>Program</th>
+            </tr>
+          </thead>
+          <tbody id="dirBody">
+            <tr><td colspan="4" style="text-align:center; padding:32px; color:var(--muted);">Loading members…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="dir-pagination" id="dirPagination"></div>
+    </div>
+  </div>/members -->
+
+    <!-- ══ EVENTS ══ -->
+    <div id="view-events" class="page-view">
+      <div class="section-shell">
+        <div class="section-header">
+          <span class="section-eyebrow">Stay In The Loop</span>
+          <h2 class="section-title">Events &amp; Announcements</h2>
+          <p class="section-sub">All COMSOC activities — from workshops and seminars to socials and competitions.</p>
+        </div>
+
+        <div class="events-filter-row" id="eventsFilterRow">
+          <button class="filter-pill active" data-filter="all">All</button>
+          <button class="filter-pill" data-filter="upcoming">Upcoming</button>
+          <button class="filter-pill" data-filter="ongoing">Ongoing</button>
+          <button class="filter-pill" data-filter="past">Past</button>
+        </div>
+
+        <div class="events-grid" id="eventsGrid">
+          <div style="color:var(--muted); font-size:13px;">Loading events…</div>
+        </div>
+      </div>
+    </div><!-- /events -->
+
+    <!-- ══ ABOUT ══ -->
+    <div id="view-about" class="page-view">
+      <div class="section-shell">
+        <div class="section-header">
+          <span class="section-eyebrow">Who We Are</span>
+          <h2 class="section-title">About COMSOC</h2>
+        </div>
+
+        <div class="about-intro">
+          <p>
+            The <strong>Computer Society (COMSOC)</strong> is the official club for all Computer Science, Information
+            Technology, and related program students. We are dedicated to building a community of tech-driven
+            individuals through education, collaboration, and innovation.
+          </p>
+          <p>
+            Our mission is to equip members with practical skills, industry insights, and peer connections that go
+            beyond the classroom — preparing future IT professionals for the real world.
+          </p>
+        </div>
+
+        <div class="section-header">
+          <span class="section-eyebrow">Meet The Team</span>
+          <h2 class="section-title" style="font-size: clamp(22px,4vw,34px);">Officer Board</h2>
+        </div>
+
+        <div class="officers-grid" id="officersGrid">
+          <div style="color:var(--muted); font-size:13px;">Loading officers…</div>
+        </div>
+
+        <!-- Inquiry -->
+        <!-- <div class="inquiry-section">
+        <div class="section-header">
+          <span class="section-eyebrow">Get In Touch</span>
+          <h2 class="section-title" style="font-size: clamp(22px,4vw,34px);">Membership Inquiry</h2>
+          <p class="section-sub">Have questions about COMSOC or want to apply? Send us a message and an officer will get back to you.</p>
+        </div>
+
+        <div class="inquiry-form">
+          <div class="form-row">
+            <div class="form-field">
+              <label class="form-label" for="inqName">Full Name</label>
+              <input type="text" id="inqName" class="form-input" placeholder="Last, First"/>
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="inqCourse">Program / Year</label>
+              <input type="text" id="inqCourse" class="form-input" placeholder="e.g. BSIT-1"/>
+            </div>
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="inqEmail">Email Address</label>
+            <input type="email" id="inqEmail" class="form-input" placeholder="you@email.com"/>
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="inqMsg">Message</label>
+            <textarea id="inqMsg" class="form-textarea" placeholder="Your question or message…"></textarea>
+          </div>
+          <button class="btn-primary" id="inqSubmit">Send Inquiry</button>
+        </div>
+      </div> -->
+      </div>
+    </div><!-- /about -->
+
+    <!-- ══ ADMIN ══ -->
+    <div id="view-admin" class="page-view">
+
+      <!-- Login screen -->
+      <div id="adminLogin" class="admin-login-wrap">
+        <div class="admin-login-card glass-panel">
+          <div class="admin-lock-icon">🔐</div>
+          <h2 class="admin-login-title">Admin Access</h2>
+          <p class="admin-login-sub">This area is restricted to COMSOC officers only. Enter your admin password to
+            continue.</p>
+          <div class="admin-pw-wrap">
+            <input type="password" id="adminPwInput" class="admin-pw-input" placeholder="••••••••••"
+              autocomplete="current-password" />
+            <button class="admin-pw-toggle" id="adminPwToggle" aria-label="Show/hide password" type="button">👁</button>
+          </div>
+          <button class="admin-login-btn" id="adminLoginBtn">Unlock Panel</button>
+          <div class="admin-error" id="adminError"></div>
+          <p class="admin-hint">
+            Password is stored as a <strong>SHA-256 hash</strong> in <code>admin_config.csv</code>.<br />
+            Default password: <code>comsoc2026</code> — change it after first login.
+          </p>
+        </div>
+      </div>
+
+      <!-- Admin Panel (shown after login) -->
+      <div id="adminPanel" class="admin-panel" style="display:none">
+        <div class="admin-topbar">
+          <div class="admin-topbar-left">
+            <h2>Admin Panel</h2>
+            <p>Welcome, Officer. Manage COMSOC data below.</p>
+          </div>
+          <button class="admin-logout-btn" id="adminLogoutBtn">🔒 Logout</button>
+        </div>
+
+        <div class="admin-tabs">
+          <button class="admin-tab active" data-tab="analytics">Analytics</button>
+          <button class="admin-tab" data-tab="members">Member Manager</button>
+          <button class="admin-tab" data-tab="export">Export</button>
+          <button class="admin-tab" data-tab="ayear">Academic Year</button>
+        </div>
+
+        <!-- TAB: Analytics -->
+        <div class="admin-tab-panel active" id="tab-analytics">
+          <div class="analytics-grid" id="analyticsCards"></div>
+          <div class="chart-section glass-panel" id="analyticsChart">
+            <div class="chart-title">Members by Program</div>
+            <div class="bar-chart" id="barChart"></div>
+          </div>
+        </div>
+
+        <!-- TAB: Member Manager -->
+        <div class="admin-tab-panel" id="tab-members">
+          <div class="info-box" style="margin-bottom:20px;">
+            <strong>How to add/remove members:</strong> Edit <code>members.csv</code> directly in your repository and
+            push the changes. This tool shows you the live loaded data. Use the Export tab to download a copy, edit it,
+            then re-upload to GitHub.
+          </div>
+          <div class="admin-toolbar">
+            <input type="text" id="adminMemberSearch" class="admin-search" placeholder="Search by name or ID…" />
+            <select id="adminMemberFilter" class="export-select" style="min-width:130px;">
+              <option value="">All Programs</option>
+            </select>
+            <span style="font-size:12px; color:var(--muted); white-space:nowrap;" id="adminMemberCount"></span>
+          </div>
+          <div class="admin-table-wrap glass-panel">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Member ID</th>
+                  <th>Full Name</th>
+                  <th>Program</th>
+                  <th>Verif. Code</th>
+                </tr>
+              </thead>
+              <tbody id="adminMemberBody"></tbody>
+            </table>
+          </div>
+          <div class="dir-pagination" id="adminMemberPag"></div>
+        </div>
+
+        <!-- TAB: Export -->
+        <div class="admin-tab-panel" id="tab-export">
+          <div class="export-panel">
+            <div class="export-section glass-panel">
+              <div class="export-title">Export Full Member List</div>
+              <div class="export-desc">Download the complete member registry as a <code>.csv</code> file — ready to edit
+                and re-upload to your GitHub repo.</div>
+              <button class="btn-export" id="exportAllBtn">⬇ Download members.csv</button>
+            </div>
+            <div class="export-section glass-panel">
+              <div class="export-title">Filtered Export</div>
+              <div class="export-desc">Export only members from a specific program or year level.</div>
+              <div class="export-filter-row">
+                <select id="exportFilterSelect" class="export-select">
+                  <option value="">All Programs</option>
+                </select>
+              </div>
+              <button class="btn-export" id="exportFilteredBtn">⬇ Download Filtered CSV</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: Academic Year -->
+        <div class="admin-tab-panel" id="tab-ayear">
+          <div class="ay-panel">
+            <div class="ay-current">Current academic year: <strong id="currentAyDisplay">—</strong></div>
+            <div class="info-box" style="margin-bottom:24px;">
+              <strong>To update the academic year:</strong> Edit <code>academic_year.csv</code> in your repository —
+              change the second line to the new year (e.g. <code>2026-2027</code>) and push the changes to GitHub. The
+              site will reflect the update automatically after the GitHub Pages rebuild.
+              <br /><br />
+              <strong>CSV Format:</strong><br />
+              <code>academic_year</code><br />
+              <code>2026-2027</code>
+            </div>
+            <div class="export-section glass-panel" style="max-width:420px;">
+              <div class="export-title">Download academic_year.csv</div>
+              <div class="export-desc">Download a pre-filled template with a new year value you can edit and push.</div>
+              <div class="form-field" style="margin-bottom:16px;">
+                <label class="form-label">New Academic Year</label>
+                <input type="text" id="newAyInput" class="form-input" placeholder="e.g. 2026-2027"
+                  style="max-width:220px;" />
+              </div>
+              <button class="btn-export" id="downloadAyBtn">⬇ Download academic_year.csv</button>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /adminPanel -->
+    </div><!-- /admin -->
+
+  </div><!-- /page-wrapper -->
+
+  <!-- ─── FOOTER ─── -->
+  <footer class="site-footer">
+    <p>Computer Society — COMSOC &copy; 2026 &nbsp;|&nbsp; For inquiries, contact your chapter officers.</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+
+</html>
