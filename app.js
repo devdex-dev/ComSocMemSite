@@ -1,23 +1,13 @@
-// Implementing academic year loading from academic_year.csv
-
-const fs = require('fs');
-const path = require('path');
-
-function loadAcademicYears() {
-    const filePath = path.join(__dirname, 'academic_year.csv');
-    fs.readFile(filePath, 'utf8', (err, data) => {
-        if (err) {
-            console.error('Error reading the file:', err);
-            return;
-        }
-        const academicYears = parseCSV(data);
-        console.log(academicYears);
-    });
-}
-
-function parseCSV(data) {
-    const lines = data.split('\n');
-    return lines.map(line => line.split(','));
-}
-
-loadAcademicYears();
+fetch('academic_year.csv')
+    .then(response => response.blob())
+    .then(blob => {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const text = event.target.result;
+            // Assuming CSV has a single line with the academic year
+            const academicYear = text.split('\n')[0];
+            document.querySelector('.stats-strip').innerText += ` Academic Year: ${academicYear}`;
+        };
+        reader.readAsText(blob);
+    })
+    .catch(error => console.error('Error fetching academic year:', error));
