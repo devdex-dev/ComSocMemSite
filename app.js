@@ -205,10 +205,19 @@ function levenshtein(a, b) {
  * Find a match by:
  *  1. Exact Member ID  (e.g. "COM-2025-001")
  *  2. Exact full name  (e.g. "Alexandra Reyes")
- *  3. Partial name     (e.g. "Alexandra" or "Reyes" — substring match)
+ *  3. Partial name — left-to-right: query must match the start of the full
+ *     name OR the start of any individual word in the name.
+ *     e.g. "ale" matches "Alexandra Reyes" (starts with "ale")
+ *          "rey" matches "Alexandra Reyes" (word "reyes" starts with "rey")
+ *          "ndra" does NOT match (mid-word, not from the left)
  *
  * @returns {object|null}
  */
+function nameStartsWith(name, q) {
+  if (name.startsWith(q)) return true;
+  return name.split(' ').some(word => word.startsWith(q));
+}
+
 function findExact(query) {
   const q = normalize(query);
 
@@ -219,7 +228,7 @@ function findExact(query) {
   if (byName) return byName;
 
   if (q.length >= 2) {
-    const partials = MEMBERS_DATA.filter(m => normalize(m.name).includes(q));
+    const partials = MEMBERS_DATA.filter(m => nameStartsWith(normalize(m.name), q));
     if (partials.length > 0) return partials[0];
   }
 
@@ -227,7 +236,7 @@ function findExact(query) {
 }
 
 /**
- * Return ALL members whose name contains the query as a substring.
+ * Return ALL members whose name starts with the query (full name or any word).
  * Used to populate "Other matches" suggestions when multiple records hit.
  */
 function findAllPartial(query) {
@@ -236,7 +245,7 @@ function findAllPartial(query) {
   return MEMBERS_DATA.filter(m =>
     normalize(m.id) === q ||
     normalize(m.name) === q ||
-    normalize(m.name).includes(q)
+    nameStartsWith(normalize(m.name), q)
   );
 }
 
@@ -253,7 +262,8 @@ function findFuzzy(query) {
       const nName = normalize(m.name);
       const nId   = normalize(m.id);
 
-      if (nName.includes(q) || nId.includes(q)) {
+      // Left-to-right match wins immediately (score 0)
+      if (nameStartsWith(nName, q) || nId.startsWith(q)) {
         return { member: m, score: 0 };
       }
 
