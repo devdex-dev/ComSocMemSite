@@ -297,33 +297,45 @@ function findMatches(query) {
 
 /**
  * Fuzzy / typo-tolerant fallback — only called when findMatches() finds nothing.
- * Checks full name, last name, and each word in the last name via Levenshtein.
- * Returns up to 5 closest members sorted by edit distance.
+ *
+ * Scoring strategy (primary focus: last name, since that's what users type):
+ *  - Score 0  : last name starts with query (left-to-right, already a near-miss)
+ *  - Score 1+ : Levenshtein distance against the last name, each word in it,
+ *               and the full stored name as a safety net
+ *
+ * Acceptance threshold: up to 40% of the query length in edits, minimum 2.
+ * This is intentionally more generous than before so that short typos like
+ * "Sanots" → "Santos" or "De Asiss" → "De Asis" are always surfaced.
+ *
+ * Returns up to 5 closest members sorted by score (best first).
  */
 function findFuzzy(query) {
   const q = normalize(query);
   if (q.length < 2) return [];
+
+  // Generous threshold: allow ~1 typo per 2.5 chars, minimum 2 edits accepted
+  const threshold = Math.max(2, Math.ceil(q.length * 0.4));
 
   return MEMBERS_DATA
     .map(m => {
       const nName    = normalize(m.name);
       const nId      = normalize(m.id);
       const lastName = extractLastName(nName);
+      const lWords   = lastName.split(' ');
 
-      // Left-to-right last-name match → score 0
+      // Left-to-right last-name match → best possible score
       if (lastNameStartsWith(nName, q) || nId.startsWith(q)) {
         return { member: m, score: 0 };
       }
 
-      // Levenshtein against full name, last name, and each word in last name
-      const lWords  = lastName.split(' ');
+      // Levenshtein: check last name as a whole, each word in it, and full name
       const minDist = Math.min(
-        levenshtein(nName, q),
         levenshtein(lastName, q),
-        ...lWords.map(w => levenshtein(w, q))
+        ...lWords.map(w => levenshtein(w, q)),
+        levenshtein(nName, q)
       );
 
-      if (minDist <= Math.max(2, Math.floor(q.length / 3))) {
+      if (minDist <= threshold) {
         return { member: m, score: minDist };
       }
       return null;
@@ -381,7 +393,24 @@ function renderMemberCard(member, codeEntered) {
 }
 
 /**
- * Render the "not found" error card.
+ * Soft "no exact match" message shown above fuzzy suggestions.
+ * Used when there's no match but we have nearby suggestions to offer.
+ */
+function renderNoExactMatch(query) {
+  return `
+    <div class="notfound-card" style="border-color:var(--warning,#f59e0b);background:var(--warning-bg,#fffbeb);">
+      <div class="notfound-icon">🔍</div>
+      <div class="notfound-title" style="color:var(--warning-dark,#b45309);">No exact match found</div>
+      <p class="notfound-sub">
+        No record exactly matches <strong>"${escapeHtml(query)}"</strong>.
+        Did you mean one of the members below?
+      </p>
+    </div>`;
+}
+
+/**
+ * Hard "not found" card — shown only when fuzzy search also returns nothing.
+ * This is the definitive "this person is not in the registry" message.
  */
 function renderNotFound(query) {
   return `
@@ -472,9 +501,17 @@ function performSearch() {
     resultArea.innerHTML = '';
     renderSuggestions(multiple, 'Multiple members found — select one:');
   } else {
-    // No match at all — show Not Found card AND fuzzy "Did you mean?" together
-    resultArea.innerHTML = renderNotFound(query);
-    renderSuggestions(findFuzzy(query), 'Did you mean?');
+    // No exact match — run fuzzy to find nearby names
+    const fuzzy = findFuzzy(query);
+    if (fuzzy.length > 0) {
+      // Show soft "no exact match" message + clickable fuzzy suggestions
+      resultArea.innerHTML = renderNoExactMatch(query);
+      renderSuggestions(fuzzy, 'Did you mean?');
+    } else {
+      // Nothing close either — show the hard "not a member" card
+      resultArea.innerHTML = renderNotFound(query);
+      hideSuggestions();
+    }
   }
 }
 
