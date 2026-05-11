@@ -362,4 +362,4 @@ Edit `index.html` (bottom):
 
 ---
 
-**Made with ❤️ for COMSOC | Ready for Programmer Transfer
+**Made with ❤️ for COMSOC (D.Decierdo)| Ready for Programmer Transfer
